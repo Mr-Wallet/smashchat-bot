@@ -29,3 +29,6 @@ node_modules
 
 # API token
 token.js
+
+# Save data
+saveData
