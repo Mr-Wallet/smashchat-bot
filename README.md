@@ -1,9 +1,10 @@
 # smashchat-bot
 
 ##Setup:
-In the repo, install dependencies because this isn't a proper package:
-`npm install --save botkit`
-`npm install --save lodash`
+In the repo, install dependencies because this isn't a proper package with a `package.json`:
+`npm install botkit`
+`npm install lodash`
+`npm install bluebird`
 
 Create a `token.js` which exports as a string with a valid slack bot token
 
