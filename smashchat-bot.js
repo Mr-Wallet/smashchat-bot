@@ -111,8 +111,8 @@ controller.hears(['^wompem$'],['direct_message', 'direct_mention'], function(bot
 });
 
 
-controller.hears(['^wompem give ((?:[a-zA-Z0-9_\-]+)|(?:<@[a-zA-Z0-9]+>)) ([0-9]+)$'],['direct_message', 'direct_mention'], function(bot,message) {
-  const matches = message.text.match(/^wompem give ((?:[a-zA-Z0-9_\-]+)|(?:<@[a-zA-Z0-9]+>)) ([0-9]+)$/i);
+controller.hears(['^wompem give ((?:[a-zA-Z0-9_\-]+)|(?:<@[a-zA-Z0-9]+>)) (\-?[0-9]+)$'],['direct_message', 'direct_mention'], function(bot,message) {
+  const matches = message.text.match(/^wompem give ((?:[a-zA-Z0-9_\-]+)|(?:<@[a-zA-Z0-9]+>)) (\-?[0-9]+)$/i);
   const targetName = matches[1];
   let targetID;
   if (targetName.slice(0, 2) == '<@') {
@@ -181,10 +181,11 @@ controller.hears(['dedede', 'daniel'],['direct_mention', 'mention', 'ambient'], 
 
 controller.hears(['help'],['direct_message', 'direct_mention'], function(bot, message) {
   bot.privateMessage(message.user, 'Here are my commands:\n'
+    + ' `--dash-dash` Not a real command but have fun verbally explaining how to use it.\n'
     + '  `help` This list of commands.\n'
     + '  `score` Find out if Jose\'s score is at an all-time high.\n'
     + '  `wompem` Get your current WompEm balance.\n'
-    + '  `wompem give [user] [amount]` Give WompEm to another smash channel member.'
+    + '  `wompem give [user] [amount]` Give WompEm to another smash channel member. (Whole numbers only)'
   );
 });
 
