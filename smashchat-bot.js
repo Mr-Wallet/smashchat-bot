@@ -205,7 +205,7 @@ controller.on('message_received', function(bot, message) {
     }
 
     const now = new Date();
-    if (differentDays(userData.lastCheckin, now) && now.getDay() !== 0 && now.getDay() !== 6) {
+    if (differentDays(new Date(userData.lastCheckin), now) && now.getDay() !== 0 && now.getDay() !== 6) {
       userData.wompEm += getDailyWompEm();
     }
     userData.lastCheckin = now;
