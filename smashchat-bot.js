@@ -88,7 +88,7 @@ bot.startRTM(function(error /*, bot, payload */) {
 
 // helpers
 const getScoreMessage = function() {
-  return 'Jose\'s score is _not_ at an all-time high. (2220 vs. 2250)';
+  return 'Jose\'s score is _not_ at an all-time high. (2219 vs. 2250)';
 }
 
 const getDededeMessage = function() {
@@ -172,7 +172,7 @@ controller.hears(['^wompem give ((?:[a-zA-Z0-9_\-]+)|(?:<@[a-zA-Z0-9]+>)) (\-?[0
 
 controller.hears(['dedede', 'daniel'],['direct_mention', 'mention', 'ambient'], function(bot,message) {
   if (dededeTimer) {
-    dededeTimer = Math.max(dededeTimer - 2, 0);
+    dededeTimer--;
     return;
   }
   bot.reply(message, getDededeMessage());
@@ -193,11 +193,13 @@ controller.hears(['.*'],['direct_message', 'direct_mention'], function(bot, mess
   bot.reply(message, 'I don\'t understand. Try messaging me for `help`.');
 });
 
-controller.on('message_received', function(bot, message) {
+controller.on('ambient', function(bot, message) {
   if (dededeTimer) {
     dededeTimer--;
   }
+})
 
+controller.on('message_received', function(bot, message) {
   controller.storage.users.get(message.user, function(error,userData) {
     if (!userData) {
       userData = getNewUserData(message.user);
