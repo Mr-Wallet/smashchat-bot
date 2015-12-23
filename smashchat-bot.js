@@ -2,7 +2,8 @@
 "use strict"
 
 const Botkit = require('botkit');
-const Promise = require("bluebird");
+const Promise = require('bluebird');
+const Wompem = require('./wompem');
 const _ = require('lodash');
 
 const SMASH_CHANNEL_ID = 'G02K3JP83';
@@ -19,15 +20,13 @@ const differentDays = function differentDays(date1, date2) {
   return Math.floor(ms/msPerDay);
 }
 
-const getDailyWompEm = function getDailyWompEm() {
-  return Math.floor(Math.random() * 20) + 90;
-}
+
 
 const getNewUserData = function getNewUserData(id) {
   return {
     id: id,
     lastCheckin: new Date(),
-    wompEm: 1000
+    wompEm: Wompem.DEFAULT_WOMPEM
   };
 };
 
@@ -209,7 +208,7 @@ controller.on('message_received', function(bot, message) {
 
     const now = new Date();
     if (differentDays(new Date(userData.lastCheckin), now) && now.getDay() !== 0 && now.getDay() !== 6) {
-      userData.wompEm += getDailyWompEm();
+      userData.wompEm += Wompem.getDailyWompEm();
     }
     userData.lastCheckin = now;
     controller.storage.users.save(userData);
