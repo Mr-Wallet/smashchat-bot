@@ -1,4 +1,4 @@
-/* global require */
+/* global console require */
 "use strict"
 
 const Botkit = require('botkit');
@@ -9,7 +9,7 @@ const _ = require('lodash');
 const SMASH_CHANNEL_ID = 'G02K3JP83';
 // const ADMIN = 'U04CT4Y06' //jordan_wallet
 
-let dededeTimer = 0;
+let dededeTimer = 50;
 let smashChannelMembers = {};
 
 const differentDays = function differentDays(date1, date2) {
@@ -45,6 +45,7 @@ bot.api.im = Promise.promisifyAll(bot.api.im);
 bot.api.users = Promise.promisifyAll(bot.api.users);
 
 bot.findUserByName = function findUserByName(userName) {
+  userName = userName.toLowerCase();
   return bot.api.groups.infoAsync({ channel: SMASH_CHANNEL_ID })
     .then(function(response) {
       const members = response.group.members;
@@ -63,7 +64,7 @@ bot.findUserByName = function findUserByName(userName) {
       return Promise.all(promises);
     })
     .then(function() {
-      return _.find(smashChannelMembers, 'name', userName);
+      return _.find(smashChannelMembers, {name: userName});
     });
 }
 
@@ -87,7 +88,7 @@ bot.startRTM(function(error /*, bot, payload */) {
 
 // helpers
 const getScoreMessage = function() {
-  return 'Jose\'s score is _not_ at an all-time high. (2219 vs. 2250)';
+  return 'Jose\'s score is NOT at an all-time high. (2303 vs. 2332)';
 }
 
 const getDededeMessage = function() {
@@ -109,9 +110,11 @@ controller.hears(['^wompem$'],['direct_message', 'direct_mention'], function(bot
   })
 });
 
-
-controller.hears(['^wompem give ((?:[a-zA-Z0-9_\-]+)|(?:<@[a-zA-Z0-9]+>)) (\-?[0-9]+)$'],['direct_message', 'direct_mention'], function(bot,message) {
-  const matches = message.text.match(/^wompem give ((?:[a-zA-Z0-9_\-]+)|(?:<@[a-zA-Z0-9]+>)) (\-?[0-9]+)$/i);
+controller.hears([
+  '^wompem give ((?:[a-zA-Z0-9_\-]+)|(?:<@[a-zA-Z0-9]+>)) (\-?[0-9]+)$',
+  '^give ((?:[a-zA-Z0-9_\-]+)|(?:<@[a-zA-Z0-9]+>)) (\-?[0-9]+) wompem$'
+],['direct_message', 'direct_mention'], function(bot,message) {
+  const matches = message.text.match(/give ((?:[a-zA-Z0-9_\-]+)|(?:<@[a-zA-Z0-9]+>)) (\-?[0-9]+)/i);
   const targetName = matches[1];
   let targetID;
   if (targetName.slice(0, 2) == '<@') {
@@ -126,7 +129,6 @@ controller.hears(['^wompem give ((?:[a-zA-Z0-9_\-]+)|(?:<@[a-zA-Z0-9]+>)) (\-?[0
 
   const findUser = function findUser() {
     if (targetID) {
-      console.log(targetID);
       return bot.api.users.infoAsync({user: targetID})
         .then(function(response) { return response.user });
     }
@@ -142,13 +144,13 @@ controller.hears(['^wompem give ((?:[a-zA-Z0-9_\-]+)|(?:<@[a-zA-Z0-9]+>)) (\-?[0
       controller.storage.users.get(targetInfo.id, function(error,targetData) {
         if (!targetData) {
           targetData = getNewUserData(targetInfo.id);
-          controller.storage.users.save(targetData);
         }
         return bot.api.users.infoAsync({user: message.user})
           .then(function(response) {
             const userInfo = response.user;
             if (targetInfo.name === userInfo.name) {
               bot.privateMessage(message.user, 'You can\'t give WompEm to yourself!');
+              controller.storage.users.save(targetData);
               return;
             }
 
@@ -192,13 +194,17 @@ controller.hears(['.*'],['direct_message', 'direct_mention'], function(bot, mess
   bot.reply(message, 'I don\'t understand. Try messaging me for `help`.');
 });
 
-controller.on('ambient', function(bot, message) {
+controller.on('ambient', function() {
   if (dededeTimer) {
     dededeTimer--;
   }
-})
+});
 
-controller.on('message_received', function(bot, message) {
+const idleFn = function idleFn(bot, message) {
+  if (message.type !== 'message') {
+    return;
+  }
+
   controller.storage.users.get(message.user, function(error,userData) {
     if (!userData) {
       userData = getNewUserData(message.user);
@@ -213,4 +219,9 @@ controller.on('message_received', function(bot, message) {
     userData.lastCheckin = now;
     controller.storage.users.save(userData);
   });
-});
+};
+
+controller.on('ambient', idleFn);
+controller.on('mention', idleFn);
+controller.on('direct_mention', idleFn);
+controller.on('direct_message', idleFn);
