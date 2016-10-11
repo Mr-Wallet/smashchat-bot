@@ -35,6 +35,7 @@ const controller = Botkit.slackbot({
 });
 
 const bot = controller.spawn({
+  retry: 100,
   token: require('./token.js')
 });
 
@@ -95,7 +96,6 @@ const getDededeMessage = function() {
   return 'http://img.ifcdn.com/images/eed2c392ae247b9824dffecd6c56000bd45accd259a9ee1bc9e2497548bc8bb4_1.gif';
 }
 
-// logic
 controller.hears(['^score$'],['direct_message', 'direct_mention'], function(bot,message) {
   bot.reply(message, getScoreMessage());
 });
